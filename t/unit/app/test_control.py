@@ -1,3 +1,5 @@
+import unittest
+import unittest.mock as mock
 from unittest.mock import Mock
 
 import pytest
@@ -519,3 +521,14 @@ class test_Control:
         self.app.conf.control_exchange = 'test_exchange'
         c = control.Control(self.app)
         assert c.mailbox.namespace == 'test_exchange'
+
+    @pytest.mark.parametrize("accept_content", (
+        tuple(), (mock.sentinel.MIME_TYPE, ), ("json", ),
+    ))
+    def test_control_accept_content(self, accept_content):
+        mock_app = Mock(spec=self.app)
+        mock_app.conf.accept_content = accept_content
+        c = control.Control(mock_app)
+        unittest.TestCase().assertCountEqual(
+            c.mailbox.accept, {"json", *accept_content}
+        )

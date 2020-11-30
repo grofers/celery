@@ -165,13 +165,14 @@ class Control:
     """Worker remote control client."""
 
     Mailbox = Mailbox
+    _REQUIRED_CONTENT_TYPES = {"json"}
 
     def __init__(self, app=None):
         self.app = app
         self.mailbox = self.Mailbox(
             app.conf.control_exchange,
             type='fanout',
-            accept=['json'],
+            accept=set(app.conf.accept_content) | self._REQUIRED_CONTENT_TYPES,
             producer_pool=lazy(lambda: self.app.amqp.producer_pool),
             queue_ttl=app.conf.control_queue_ttl,
             reply_queue_ttl=app.conf.control_queue_ttl,
